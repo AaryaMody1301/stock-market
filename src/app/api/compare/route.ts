@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marketData } from "@/lib/providers";
 import { z } from "zod/v4";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   symbols: z
@@ -10,6 +11,9 @@ const schema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  const limited = rateLimit(ip);
+  if (limited) return limited;
   const { searchParams } = request.nextUrl;
   const parsed = schema.safeParse({ symbols: searchParams.get("symbols") || "" });
 

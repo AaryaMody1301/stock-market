@@ -36,14 +36,14 @@ export function MarketTable({ quotes }: MarketTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Symbol</TableHead>
-            <TableHead className="text-right">Price</TableHead>
-            <TableHead className="text-right">Change</TableHead>
-            <TableHead className="hidden sm:table-cell">Trend</TableHead>
-            <TableHead className="hidden text-right sm:table-cell">Open</TableHead>
-            <TableHead className="hidden text-right md:table-cell">High</TableHead>
-            <TableHead className="hidden text-right md:table-cell">Low</TableHead>
-            <TableHead className="hidden text-right lg:table-cell">Volume</TableHead>
+            <TableHead className="w-[100px]" scope="col">Symbol</TableHead>
+            <TableHead className="text-right" scope="col">Price</TableHead>
+            <TableHead className="text-right" scope="col">Change</TableHead>
+            <TableHead className="hidden sm:table-cell" scope="col">Trend</TableHead>
+            <TableHead className="hidden text-right sm:table-cell" scope="col">Open</TableHead>
+            <TableHead className="hidden text-right md:table-cell" scope="col">High</TableHead>
+            <TableHead className="hidden text-right md:table-cell" scope="col">Low</TableHead>
+            <TableHead className="hidden text-right lg:table-cell" scope="col">Volume</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

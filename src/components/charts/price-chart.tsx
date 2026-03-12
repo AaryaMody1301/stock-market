@@ -196,6 +196,8 @@ export function PriceChart({
     <div
       ref={containerRef}
       className="w-full rounded-lg"
+      role="img"
+      aria-label="Stock price candlestick chart"
     />
   );
 }

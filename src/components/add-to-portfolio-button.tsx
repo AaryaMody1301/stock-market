@@ -20,19 +20,27 @@ export function AddToPortfolioButton({
   const [open, setOpen] = useState(false);
   const [shares, setShares] = useState("1");
   const [cost, setCost] = useState(currentPrice.toFixed(2));
+  const [error, setError] = useState("");
   const { addHolding } = usePortfolio();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const s = parseFloat(shares);
     const c = parseFloat(cost);
-    if (s > 0 && c > 0) {
-      addHolding(symbol, s, c);
-      toast.success(`Added ${s} shares of ${symbol} to portfolio`);
-      setOpen(false);
-      setShares("1");
-      setCost(currentPrice.toFixed(2));
+    if (!Number.isFinite(s) || s <= 0) {
+      setError("Enter a valid number of shares.");
+      return;
     }
+    if (!Number.isFinite(c) || c <= 0) {
+      setError("Enter a valid cost per share.");
+      return;
+    }
+    setError("");
+    addHolding(symbol, s, c);
+    toast.success(`Added ${s} shares of ${symbol} to portfolio`);
+    setOpen(false);
+    setShares("1");
+    setCost(currentPrice.toFixed(2));
   };
 
   return (
@@ -85,6 +93,9 @@ export function AddToPortfolioButton({
                 </span>
               </div>
             </div>
+            {error && (
+              <p className="text-sm text-destructive" role="alert">{error}</p>
+            )}
             <Button type="submit" className="w-full">
               <Briefcase className="mr-2 h-4 w-4" />
               Add to Portfolio

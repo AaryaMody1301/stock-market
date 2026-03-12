@@ -19,6 +19,7 @@ export function StockSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SymbolSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const router = useRouter();
 
   // Keyboard shortcut: Ctrl+K or Cmd+K
@@ -43,6 +44,7 @@ export function StockSearch() {
     const controller = new AbortController();
     const timeout = setTimeout(async () => {
       setLoading(true);
+      setError(false);
       try {
         const res = await fetch(`/api/stocks/search?q=${encodeURIComponent(query)}`, {
           signal: controller.signal,
@@ -50,9 +52,11 @@ export function StockSearch() {
         if (res.ok) {
           const json = await res.json();
           setResults(json.data || []);
+        } else {
+          setError(true);
         }
       } catch {
-        // Aborted or failed — ignore
+        if (!controller.signal.aborted) setError(true);
       } finally {
         setLoading(false);
       }
@@ -102,7 +106,7 @@ export function StockSearch() {
                 </div>
               )}
               {!loading && query.length > 0 && results.length === 0 && (
-                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandEmpty>{error ? "Search failed. Try again." : "No results found."}</CommandEmpty>
               )}
               {results.length > 0 && (
                 <CommandGroup heading="Stocks">

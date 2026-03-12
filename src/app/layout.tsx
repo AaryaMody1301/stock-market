@@ -30,9 +30,15 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
           <TooltipProvider>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+            >
+              Skip to main content
+            </a>
             <div className="relative flex min-h-screen flex-col">
               <SiteHeader />
-              <main className="flex-1">{children}</main>
+              <main id="main-content" className="flex-1">{children}</main>
               <footer className="border-t border-border/40 py-6">
                 <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
                   &copy; {new Date().getFullYear()} InvestSmart. Market data provided

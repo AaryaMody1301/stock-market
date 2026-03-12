@@ -12,7 +12,7 @@ export function PriceChange({ change, changePct, className }: PriceChangeProps) 
     <span
       className={cn(
         "inline-flex items-center gap-1 font-medium",
-        isPositive ? "text-emerald-500" : "text-red-500",
+        isPositive ? "text-gain" : "text-loss",
         className,
       )}
     >

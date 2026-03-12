@@ -282,8 +282,30 @@ export default async function StockPage({ params }: StockPageProps) {
   const news =
     newsResult.status === "fulfilled" ? newsResult.value : [];
 
-  // If no quote or price is 0 → stock not found
-  if (!quote || quote.price === 0) notFound();
+  // All API calls failed — show not-found only if quote truly returned null/zero price
+  // (not just a network error)
+  if (!quote) {
+    // If the quote call was rejected (API error), don't 404 — show degraded page
+    if (quoteResult.status === "rejected") {
+      return (
+        <div className="mx-auto max-w-7xl space-y-8 px-4 py-16 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-2xl font-bold">{symbol}</h1>
+          <p className="text-muted-foreground">
+            Unable to load stock data right now. Please try again later.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Markets
+          </Link>
+        </div>
+      );
+    }
+    notFound();
+  }
+  if (quote.price === 0) notFound();
 
   // Fetch related stocks (depends on profile.industry, so runs after the main batch)
   let related: SymbolSearchResult[] = [];

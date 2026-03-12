@@ -81,15 +81,15 @@ export const twelvedata: MarketDataProvider = {
       const data = await fetchTwelveData<TDQuote>("/quote", { symbol });
       return {
         symbol: data.symbol,
-        price: parseFloat(data.close),
-        change: parseFloat(data.change),
-        changePct: parseFloat(data.percent_change),
+        price: parseFloat(data.close) || 0,
+        change: parseFloat(data.change) || 0,
+        changePct: parseFloat(data.percent_change) || 0,
         volume: parseInt(data.volume, 10) || 0,
-        high: parseFloat(data.high),
-        low: parseFloat(data.low),
-        open: parseFloat(data.open),
-        prevClose: parseFloat(data.previous_close),
-        timestamp: data.timestamp,
+        high: parseFloat(data.high) || 0,
+        low: parseFloat(data.low) || 0,
+        open: parseFloat(data.open) || 0,
+        prevClose: parseFloat(data.previous_close) || 0,
+        timestamp: data.timestamp || 0,
       };
     });
   },
@@ -127,10 +127,10 @@ export const twelvedata: MarketDataProvider = {
       return (data.values || [])
         .map((v) => ({
           date: v.datetime,
-          open: parseFloat(v.open),
-          high: parseFloat(v.high),
-          low: parseFloat(v.low),
-          close: parseFloat(v.close),
+          open: parseFloat(v.open) || 0,
+          high: parseFloat(v.high) || 0,
+          low: parseFloat(v.low) || 0,
+          close: parseFloat(v.close) || 0,
           volume: parseInt(v.volume, 10) || 0,
         }))
         .reverse();

@@ -68,12 +68,13 @@ export default function PortfolioPage() {
         );
       }
     } catch {
-      // ignore
+      // keep existing enriched data
     } finally {
       setLoading(false);
     }
   }, [holdings]);
 
+  // Fetch on mount + whenever holdings change
   useEffect(() => {
     fetchPrices();
   }, [fetchPrices]);
@@ -216,7 +217,8 @@ export default function PortfolioPage() {
                 const weight =
                   totalCurrent > 0
                     ? (h.shares * h.currentPrice) / totalCurrent
-                    : 1 / enriched.length;
+                    : 0;
+                if (weight === 0) return null;
                 return (
                   <div
                     key={h.id}
@@ -235,7 +237,8 @@ export default function PortfolioPage() {
                 const weight =
                   totalCurrent > 0
                     ? (h.shares * h.currentPrice) / totalCurrent
-                    : 1 / enriched.length;
+                    : 0;
+                if (weight === 0) return null;
                 return (
                   <div key={h.id} className="flex items-center gap-1.5 text-xs">
                     <div

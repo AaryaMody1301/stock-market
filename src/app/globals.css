@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -48,6 +50,8 @@
 }
 
 :root {
+  --gain: oklch(0.527 0.154 150.069);
+  --loss: oklch(0.577 0.245 27.325);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -83,6 +87,8 @@
 }
 
 .dark {
+  --gain: oklch(0.627 0.194 149.214);
+  --loss: oklch(0.637 0.237 25.331);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

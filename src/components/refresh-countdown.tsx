@@ -33,9 +33,10 @@ export function RefreshCountdown({
   }, [interval, onRefresh]);
 
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+    <div className="flex items-center gap-2 text-xs text-muted-foreground" role="timer" aria-live="off">
       <RefreshCw
         className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
+        aria-hidden="true"
       />
       <span>
         {loading ? "Refreshing…" : `Next update in ${remaining}s`}

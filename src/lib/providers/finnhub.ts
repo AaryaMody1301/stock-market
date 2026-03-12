@@ -98,15 +98,15 @@ export const finnhub: MarketDataProvider = {
       const data = await fetchFinnhub<FinnhubQuote>("/quote", { symbol });
       return {
         symbol,
-        price: data.c,
-        change: data.d,
-        changePct: data.dp,
-        volume: 0,
-        high: data.h,
-        low: data.l,
-        open: data.o,
-        prevClose: data.pc,
-        timestamp: data.t,
+        price: data.c ?? 0,
+        change: data.d ?? 0,
+        changePct: data.dp ?? 0,
+        volume: 0, // Finnhub /quote doesn't include volume
+        high: data.h ?? 0,
+        low: data.l ?? 0,
+        open: data.o ?? 0,
+        prevClose: data.pc ?? 0,
+        timestamp: data.t ?? 0,
       };
     });
   },

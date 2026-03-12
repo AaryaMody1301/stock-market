@@ -38,12 +38,13 @@ export default function WatchlistPage() {
         setQuotes(json.data || []);
       }
     } catch {
-      // ignore
+      // keep existing quotes on error
     } finally {
       setLoading(false);
     }
   }, [symbols]);
 
+  // Fetch on mount + whenever symbols change
   useEffect(() => {
     fetchQuotes();
   }, [fetchQuotes]);

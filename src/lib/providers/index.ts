@@ -4,6 +4,14 @@ import type { MarketDataProvider, Quote, SymbolSearchResult, CompanyProfileData,
 
 export type { Quote, SymbolSearchResult, CompanyProfileData, DailyBarData, MarketNewsItem } from "./types";
 
+/** Validates a stock ticker symbol (1-10 uppercase alphanumeric + dots) */
+const SYMBOL_RE = /^[A-Z0-9.]{1,10}$/;
+function validateSymbol(symbol: string): string {
+  const s = symbol.trim().toUpperCase();
+  if (!SYMBOL_RE.test(s)) throw new Error(`Invalid symbol: ${symbol}`);
+  return s;
+}
+
 /**
  * Unified market data service with automatic fallback.
  * Primary: Finnhub | Backup: Twelve Data
@@ -25,7 +33,8 @@ class MarketDataService {
   }
 
   async getQuote(symbol: string): Promise<Quote> {
-    return this.withFallback((p) => p.getQuote(symbol));
+    const s = validateSymbol(symbol);
+    return this.withFallback((p) => p.getQuote(s));
   }
 
   async getQuotes(symbols: string[]): Promise<Quote[]> {
@@ -38,22 +47,25 @@ class MarketDataService {
   }
 
   async searchSymbol(query: string): Promise<SymbolSearchResult[]> {
-    return this.withFallback((p) => p.searchSymbol(query));
+    const q = query.trim().slice(0, 50);
+    if (!q) return [];
+    return this.withFallback((p) => p.searchSymbol(q));
   }
 
   async getCompanyProfile(symbol: string): Promise<CompanyProfileData> {
-    // Only Finnhub supports this on free tier — timeout-protected
+    const s = validateSymbol(symbol);
     try {
-      return await finnhub.getCompanyProfile(symbol);
+      return await finnhub.getCompanyProfile(s);
     } catch (err) {
-      console.warn(`[MarketData] getCompanyProfile(${symbol}) failed:`,
+      console.warn(`[MarketData] getCompanyProfile(${s}) failed:`,
         err instanceof Error ? err.message : err);
       throw err;
     }
   }
 
   async getDailyBars(symbol: string, from: string, to: string): Promise<DailyBarData[]> {
-    return this.withFallback((p) => p.getDailyBars(symbol, from, to));
+    const s = validateSymbol(symbol);
+    return this.withFallback((p) => p.getDailyBars(s, from, to));
   }
 
   async getMarketNews(category?: string): Promise<MarketNewsItem[]> {
@@ -61,7 +73,8 @@ class MarketDataService {
   }
 
   async getCompanyNews(symbol: string): Promise<MarketNewsItem[]> {
-    return getCompanyNews(symbol);
+    const s = validateSymbol(symbol);
+    return getCompanyNews(s);
   }
 }
 

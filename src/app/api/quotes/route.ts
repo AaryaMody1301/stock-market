@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { marketData } from "@/lib/providers";
 import { z } from "zod";
 import { REVALIDATE } from "@/lib/constants";
+import { rateLimit } from "@/lib/rate-limit";
 
 const querySchema = z.object({
   symbols: z
@@ -12,6 +13,9 @@ const querySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  const limited = rateLimit(ip);
+  if (limited) return limited;
   const { searchParams } = request.nextUrl;
   const parsed = querySchema.safeParse({ symbols: searchParams.get("symbols") });
 
