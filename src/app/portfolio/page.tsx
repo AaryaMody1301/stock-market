@@ -1,0 +1,380 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { usePortfolio, type Holding } from "@/hooks/use-portfolio";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { formatPrice } from "@/components/markets/quote-helpers";
+import {
+  Briefcase,
+  Plus,
+  Trash2,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  PieChart,
+  Download,
+} from "lucide-react";
+import type { Quote } from "@/lib/providers/types";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { RefreshCountdown } from "@/components/refresh-countdown";
+
+interface HoldingWithQuote extends Holding {
+  currentPrice: number;
+  change: number;
+  changePct: number;
+}
+
+export default function PortfolioPage() {
+  const { holdings, removeHolding } = usePortfolio();
+  const [enriched, setEnriched] = useState<HoldingWithQuote[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchPrices = useCallback(async () => {
+    if (holdings.length === 0) {
+      setEnriched([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const symbols = [...new Set(holdings.map((h) => h.symbol))];
+      const res = await fetch(`/api/quotes?symbols=${symbols.join(",")}`);
+      if (res.ok) {
+        const json = await res.json();
+        const quoteMap = new Map<string, Quote>();
+        for (const q of json.data || []) {
+          quoteMap.set(q.symbol, q);
+        }
+        setEnriched(
+          holdings.map((h) => {
+            const q = quoteMap.get(h.symbol);
+            return {
+              ...h,
+              currentPrice: q?.price || 0,
+              change: q?.change || 0,
+              changePct: q?.changePct || 0,
+            };
+          }),
+        );
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, [holdings]);
+
+  useEffect(() => {
+    fetchPrices();
+  }, [fetchPrices]);
+
+  // Portfolio metrics
+  const totalInvested = enriched.reduce(
+    (s, h) => s + h.shares * h.avgCost,
+    0,
+  );
+  const totalCurrent = enriched.reduce(
+    (s, h) => s + h.shares * h.currentPrice,
+    0,
+  );
+  const totalPL = totalCurrent - totalInvested;
+  const totalPLPct = totalInvested > 0 ? (totalPL / totalInvested) * 100 : 0;
+
+  const exportCSV = () => {
+    const header = "Symbol,Shares,Avg Cost,Current Price,Market Value,P&L,P&L %";
+    const rows = enriched.map((h) => {
+      const mv = h.shares * h.currentPrice;
+      const cb = h.shares * h.avgCost;
+      const pl = mv - cb;
+      const plPct = cb > 0 ? (pl / cb) * 100 : 0;
+      return `${h.symbol},${h.shares},${h.avgCost.toFixed(2)},${h.currentPrice.toFixed(2)},${mv.toFixed(2)},${pl.toFixed(2)},${plPct.toFixed(2)}%`;
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `investsmart-portfolio-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Portfolio exported to CSV");
+  };
+
+  if (holdings.length === 0) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        <section>
+          <div className="flex items-center gap-3">
+            <Briefcase className="h-8 w-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
+              <p className="text-muted-foreground">
+                Track your investments and monitor performance
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="py-16 text-center">
+          <PieChart className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
+          <h2 className="text-xl font-semibold mb-2">No holdings yet</h2>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            Add stocks to your portfolio from any stock detail page to start
+            tracking your investments and P&L.
+          </p>
+          <Link href="/">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Browse Markets
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <section className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Briefcase className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
+            <p className="text-muted-foreground">
+              {holdings.length} holding{holdings.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <RefreshCountdown interval={30} onRefresh={fetchPrices} loading={loading} />
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportCSV}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchPrices}
+              disabled={loading}
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio Summary */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <MetricCard label="Total Value" value={formatPrice(totalCurrent)} />
+        <MetricCard label="Invested" value={formatPrice(totalInvested)} />
+        <MetricCard
+          label="Total P&L"
+          value={`${totalPL >= 0 ? "+" : ""}${formatPrice(totalPL)}`}
+          className={totalPL >= 0 ? "text-emerald-500" : "text-red-500"}
+          icon={
+            totalPL >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-red-500" />
+            )
+          }
+        />
+        <MetricCard
+          label="Return"
+          value={`${totalPLPct >= 0 ? "+" : ""}${totalPLPct.toFixed(2)}%`}
+          className={totalPLPct >= 0 ? "text-emerald-500" : "text-red-500"}
+        />
+      </div>
+
+      {/* Allocation Chart - simple bar */}
+      {enriched.length > 1 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Allocation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex h-4 w-full overflow-hidden rounded-full">
+              {enriched.map((h, i) => {
+                const weight =
+                  totalCurrent > 0
+                    ? (h.shares * h.currentPrice) / totalCurrent
+                    : 1 / enriched.length;
+                return (
+                  <div
+                    key={h.id}
+                    style={{ width: `${weight * 100}%` }}
+                    className={cn(
+                      "h-full transition-all",
+                      ALLOCATION_COLORS[i % ALLOCATION_COLORS.length],
+                    )}
+                    title={`${h.symbol}: ${(weight * 100).toFixed(1)}%`}
+                  />
+                );
+              })}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {enriched.map((h, i) => {
+                const weight =
+                  totalCurrent > 0
+                    ? (h.shares * h.currentPrice) / totalCurrent
+                    : 1 / enriched.length;
+                return (
+                  <div key={h.id} className="flex items-center gap-1.5 text-xs">
+                    <div
+                      className={cn(
+                        "h-2.5 w-2.5 rounded-full",
+                        ALLOCATION_COLORS[i % ALLOCATION_COLORS.length],
+                      )}
+                    />
+                    <span className="font-medium">{h.symbol}</span>
+                    <span className="text-muted-foreground">
+                      {(weight * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Holdings Table */}
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Symbol</TableHead>
+              <TableHead className="text-right">Shares</TableHead>
+              <TableHead className="text-right">Avg Cost</TableHead>
+              <TableHead className="text-right">Current</TableHead>
+              <TableHead className="text-right">Market Value</TableHead>
+              <TableHead className="text-right">P&L</TableHead>
+              <TableHead className="w-[60px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {enriched.map((h) => {
+              const marketValue = h.shares * h.currentPrice;
+              const costBasis = h.shares * h.avgCost;
+              const pl = marketValue - costBasis;
+              const plPct = costBasis > 0 ? (pl / costBasis) * 100 : 0;
+
+              return (
+                <TableRow key={h.id} className="hover:bg-muted/50">
+                  <TableCell className="font-semibold">
+                    <Link
+                      href={`/stocks/${h.symbol}`}
+                      className="hover:underline"
+                    >
+                      {h.symbol}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">
+                    {h.shares}
+                  </TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">
+                    {formatPrice(h.avgCost)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">
+                    {h.currentPrice > 0
+                      ? formatPrice(h.currentPrice)
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">
+                    {h.currentPrice > 0 ? formatPrice(marketValue) : "—"}
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      "text-right font-mono tabular-nums font-medium",
+                      pl >= 0 ? "text-emerald-500" : "text-red-500",
+                    )}
+                  >
+                    {h.currentPrice > 0 ? (
+                      <>
+                        {pl >= 0 ? "+" : ""}
+                        {formatPrice(pl)}
+                        <span className="ml-1 text-xs">
+                          ({plPct >= 0 ? "+" : ""}
+                          {plPct.toFixed(2)}%)
+                        </span>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => removeHolding(h.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+const ALLOCATION_COLORS = [
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-purple-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+  "bg-orange-500",
+  "bg-indigo-500",
+  "bg-teal-500",
+  "bg-pink-500",
+];
+
+function MetricCard({
+  label,
+  value,
+  className,
+  icon,
+}: {
+  label: string;
+  value: string;
+  className?: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">{label}</p>
+          {icon}
+        </div>
+        <p className={cn("text-xl font-bold tabular-nums mt-1", className)}>
+          {value}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}

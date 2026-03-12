@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Core Tables ──────────────────────────────────────────
+
+model Symbol {
+  id        Int      @id @default(autoincrement())
+  ticker    String   @unique @db.VarChar(10)
+  name      String   @db.VarChar(200)
+  exchange  String   @db.VarChar(20)
+  type      String   @default("Common Stock") @db.VarChar(50)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotes    QuoteSnapshot[]
+  dailyBars DailyBar[]
+  profile   CompanyProfile?
+
+  @@index([exchange])
+  @@map("symbols")
+}
+
+model QuoteSnapshot {
+  id        Int      @id @default(autoincrement())
+  symbolId  Int
+  price     Decimal  @db.Decimal(12, 4)
+  change    Decimal  @db.Decimal(12, 4)
+  changePct Decimal  @db.Decimal(8, 4)
+  volume    BigInt
+  high      Decimal  @db.Decimal(12, 4)
+  low       Decimal  @db.Decimal(12, 4)
+  open      Decimal  @db.Decimal(12, 4)
+  prevClose Decimal  @db.Decimal(12, 4)
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+
+  @@index([symbolId, timestamp])
+  @@index([timestamp])
+  @@map("quote_snapshots")
+}
+
+model DailyBar {
+  id       Int      @id @default(autoincrement())
+  symbolId Int
+  date     DateTime @db.Date
+  open     Decimal  @db.Decimal(12, 4)
+  high     Decimal  @db.Decimal(12, 4)
+  low      Decimal  @db.Decimal(12, 4)
+  close    Decimal  @db.Decimal(12, 4)
+  volume   BigInt
+
+  symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+
+  @@unique([symbolId, date])
+  @@index([date])
+  @@map("daily_bars")
+}
+
+model CompanyProfile {
+  id            Int      @id @default(autoincrement())
+  symbolId      Int      @unique
+  logo          String?  @db.VarChar(500)
+  industry      String?  @db.VarChar(200)
+  sector        String?  @db.VarChar(100)
+  marketCap     Decimal? @db.Decimal(20, 2)
+  website       String?  @db.VarChar(500)
+  description   String?  @db.Text
+  country       String?  @db.VarChar(5)
+  currency      String?  @db.VarChar(10)
+  updatedAt     DateTime @updatedAt
+
+  symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+
+  @@map("company_profiles")
+}
+
+model MarketNews {
+  id        Int      @id @default(autoincrement())
+  headline  String   @db.VarChar(500)
+  summary   String?  @db.Text
+  source    String   @db.VarChar(100)
+  url       String   @db.VarChar(1000)
+  imageUrl  String?  @db.VarChar(1000)
+  category  String   @db.VarChar(50)
+  publishedAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([publishedAt])
+  @@index([category])
+  @@map("market_news")
+}
+
+model JobRun {
+  id        Int      @id @default(autoincrement())
+  jobName   String   @db.VarChar(100)
+  status    String   @db.VarChar(20) // running | success | failed
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+  error     String?  @db.Text
+  metadata  Json?
+
+  @@index([jobName, startedAt])
+  @@map("job_runs")
+}
