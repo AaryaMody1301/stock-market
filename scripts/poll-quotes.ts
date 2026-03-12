@@ -100,10 +100,21 @@ async function main() {
   console.log(`Starting quote poller — interval ${POLL_INTERVAL}ms, symbols: ${SYMBOLS.join(", ")}`);
   await ensureSymbolsExist(SYMBOLS);
   await pollOnce(); // First run immediately
-  setInterval(pollOnce, POLL_INTERVAL);
+  const intervalId = setInterval(pollOnce, POLL_INTERVAL);
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    console.log("Shutting down poller...");
+    clearInterval(intervalId);
+    await db.$disconnect();
+    process.exit(0);
+  };
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error("Fatal error:", err);
+  await db.$disconnect();
   process.exit(1);
 });

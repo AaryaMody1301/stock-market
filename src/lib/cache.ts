@@ -9,6 +9,7 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
+const MAX_CACHE_SIZE = 500;
 const store = new Map<string, CacheEntry<unknown>>();
 const inflight = new Map<string, Promise<unknown>>();
 
@@ -23,6 +24,11 @@ export function cacheGet<T>(key: string): T | null {
 }
 
 export function cacheSet<T>(key: string, data: T, ttlSeconds: number): void {
+  // Evict oldest entries when cache reaches max size
+  if (store.size >= MAX_CACHE_SIZE) {
+    const firstKey = store.keys().next().value;
+    if (firstKey !== undefined) store.delete(firstKey);
+  }
   store.set(key, {
     data,
     expiresAt: Date.now() + ttlSeconds * 1000,

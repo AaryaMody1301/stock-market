@@ -41,8 +41,12 @@ export async function GET(request: NextRequest) {
       )
       .map((r) => r.value);
 
+    const failed = results
+      .map((r, i) => (r.status === "rejected" ? parsed.data.symbols[i] : null))
+      .filter(Boolean);
+
     return NextResponse.json(
-      { data },
+      { data, ...(failed.length > 0 && { failed }) },
       {
         headers: {
           "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",

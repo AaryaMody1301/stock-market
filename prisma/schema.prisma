@@ -43,6 +43,7 @@ model QuoteSnapshot {
 
   symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
 
+  @@unique([symbolId, timestamp])
   @@index([symbolId, timestamp])
   @@index([timestamp])
   @@map("quote_snapshots")

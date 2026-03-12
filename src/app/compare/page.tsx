@@ -110,7 +110,10 @@ export default function ComparePage() {
             {symbols.map((sym) => (
               <Badge key={sym} variant="secondary" className="gap-1 px-3 py-1.5">
                 {sym}
-                <button onClick={() => removeSymbol(sym)}>
+                <button
+                  onClick={() => removeSymbol(sym)}
+                  aria-label={`Remove ${sym}`}
+                >
                   <X className="h-3 w-3 hover:text-destructive" />
                 </button>
               </Badge>

@@ -26,38 +26,21 @@ async function backfill() {
   for (const sym of symbols) {
     try {
       const bars = await marketData.getDailyBars(sym.ticker, from, to);
-      let created = 0;
 
-      for (const bar of bars) {
-        try {
-          await db.dailyBar.upsert({
-            where: {
-              symbolId_date: { symbolId: sym.id, date: new Date(bar.date) },
-            },
-            update: {
-              open: bar.open,
-              high: bar.high,
-              low: bar.low,
-              close: bar.close,
-              volume: bar.volume,
-            },
-            create: {
-              symbolId: sym.id,
-              date: new Date(bar.date),
-              open: bar.open,
-              high: bar.high,
-              low: bar.low,
-              close: bar.close,
-              volume: bar.volume,
-            },
-          });
-          created++;
-        } catch {
-          // Skip duplicates silently
-        }
-      }
+      const result = await db.dailyBar.createMany({
+        data: bars.map((bar) => ({
+          symbolId: sym.id,
+          date: new Date(bar.date),
+          open: bar.open,
+          high: bar.high,
+          low: bar.low,
+          close: bar.close,
+          volume: bar.volume,
+        })),
+        skipDuplicates: true,
+      });
 
-      console.log(`  ${sym.ticker}: ${created} bars upserted`);
+      console.log(`  ${sym.ticker}: ${result.count} bars inserted (${bars.length} total)`);
 
       // Rate limit: wait 1.2 seconds between symbols (Finnhub: 60/min)
       await new Promise((r) => setTimeout(r, 1200));
