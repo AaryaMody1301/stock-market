@@ -2,17 +2,34 @@
 // Set this as the "Application startup file" in Hostinger's Node.js panel
 const { createServer } = require("http");
 const { parse } = require("url");
+const path = require("path");
+const fs = require("fs");
+
+// Check if the build exists
+const dotNextPath = path.join(__dirname, ".next");
+if (!fs.existsSync(dotNextPath)) {
+  console.error("ERROR: .next directory not found. Run 'npm run build' first.");
+  console.error("On Hostinger, set the build command to: npm run build");
+  process.exit(1);
+}
+
 const next = require("next");
 
 const port = parseInt(process.env.PORT, 10) || 3000;
-const app = next({ dev: false, port });
+const app = next({ dev: false, dir: __dirname, port });
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
-  createServer((req, res) => {
-    const parsedUrl = parse(req.url, true);
-    handle(req, res, parsedUrl);
-  }).listen(port, "0.0.0.0", () => {
-    console.log(`> InvestSmart ready on port ${port}`);
+app
+  .prepare()
+  .then(() => {
+    createServer((req, res) => {
+      const parsedUrl = parse(req.url, true);
+      handle(req, res, parsedUrl);
+    }).listen(port, "0.0.0.0", () => {
+      console.log(`> InvestSmart ready on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to start InvestSmart:", err);
+    process.exit(1);
   });
-});
