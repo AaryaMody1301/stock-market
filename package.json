@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node ./node_modules/next/dist/bin/next dev",
+    "postinstall": "prisma generate",
     "prebuild": "node ./scripts/prepare-hostinger-build.mjs",
     "build": "node ./scripts/run-next-build.mjs",
     "start": "node ./scripts/run-next-start.mjs",
