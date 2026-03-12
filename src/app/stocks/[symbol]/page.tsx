@@ -35,9 +35,9 @@ export async function generateMetadata({ params }: StockPageProps): Promise<Meta
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="font-semibold tabular-nums">{value}</p>
+    <div className="rounded-xl border border-border/50 bg-gradient-to-br from-muted/50 to-transparent p-3 transition-colors hover:border-border">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 font-semibold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -53,49 +53,67 @@ function StockHeader({
   quote: Quote;
   profile: CompanyProfileData | null;
 }) {
+  const isPositive = quote.changePct >= 0;
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">{symbol}</h1>
-          {profile?.industry && (
-            <Badge variant="secondary">{profile.industry}</Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <WatchlistButton symbol={symbol} />
-          <AddToPortfolioButton symbol={symbol} currentPrice={quote.price} />
-        </div>
-      </div>
-      {profile?.name && (
-        <p className="mt-1 text-muted-foreground">{profile.name}</p>
-      )}
-      <div className="mt-4 flex items-baseline gap-4">
-        <span className="text-4xl font-bold tabular-nums">
-          {formatPrice(quote.price)}
-        </span>
-        <PriceChange
-          change={quote.change}
-          changePct={quote.changePct}
-          className="text-lg"
-        />
+    <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-primary/5 p-6 sm:p-8">
+      {/* Background accent */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className={`absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl ${isPositive ? "bg-emerald-500/5" : "bg-red-500/5"}`} />
       </div>
 
-      {/* Key Stats */}
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatItem label="Open" value={formatPrice(quote.open)} />
-        <StatItem label="High" value={formatPrice(quote.high)} />
-        <StatItem label="Low" value={formatPrice(quote.low)} />
-        <StatItem label="Prev Close" value={formatPrice(quote.prevClose)} />
-        {profile?.marketCap && profile.marketCap > 0 && (
-          <StatItem label="Market Cap" value={formatMarketCap(profile.marketCap)} />
-        )}
-        {profile?.country && (
-          <StatItem label="Country" value={profile.country} />
-        )}
-        {profile?.currency && (
-          <StatItem label="Currency" value={profile.currency} />
-        )}
+      <div className="relative">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold">
+              {symbol.slice(0, 2)}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold tracking-tight">{symbol}</h1>
+                {profile?.industry && (
+                  <Badge variant="secondary" className="text-xs">{profile.industry}</Badge>
+                )}
+              </div>
+              {profile?.name && (
+                <p className="mt-0.5 text-muted-foreground">{profile.name}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <WatchlistButton symbol={symbol} />
+            <AddToPortfolioButton symbol={symbol} currentPrice={quote.price} />
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-baseline gap-4">
+          <span className="text-4xl font-bold tabular-nums sm:text-5xl">
+            {formatPrice(quote.price)}
+          </span>
+          <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-lg font-semibold ${isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
+            <PriceChange
+              change={quote.change}
+              changePct={quote.changePct}
+              className="text-lg"
+            />
+          </div>
+        </div>
+
+        {/* Key Stats */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatItem label="Open" value={formatPrice(quote.open)} />
+          <StatItem label="High" value={formatPrice(quote.high)} />
+          <StatItem label="Low" value={formatPrice(quote.low)} />
+          <StatItem label="Prev Close" value={formatPrice(quote.prevClose)} />
+          {profile?.marketCap && profile.marketCap > 0 && (
+            <StatItem label="Market Cap" value={formatMarketCap(profile.marketCap)} />
+          )}
+          {profile?.country && (
+            <StatItem label="Country" value={profile.country} />
+          )}
+          {profile?.currency && (
+            <StatItem label="Currency" value={profile.currency} />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -110,7 +128,7 @@ function StockChart({
 }) {
   if (bars.length === 0) {
     return (
-      <Card>
+      <Card className="border-dashed">
         <CardContent className="py-12 text-center text-muted-foreground">
           No chart data available for {symbol}.
         </CardContent>
@@ -119,11 +137,16 @@ function StockChart({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Price Chart</CardTitle>
+    <Card className="overflow-hidden border-border/50">
+      <CardHeader className="border-b border-border/40 bg-muted/20">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+            <TrendingUp className="h-3.5 w-3.5 text-primary" />
+          </div>
+          Price Chart
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <ChartWithRange symbol={symbol} initialData={bars} />
       </CardContent>
     </Card>
@@ -187,21 +210,23 @@ function StockNews({ news }: { news: MarketNewsItem[] }) {
   if (news.length === 0) return null;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden border-border/50">
+      <CardHeader className="border-b border-border/40 bg-muted/20">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Newspaper className="h-4 w-4" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10">
+            <Newspaper className="h-3.5 w-3.5 text-amber-500" />
+          </div>
           Latest News
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="divide-y divide-border/40 p-0">
         {news.slice(0, 5).map((item, i) => (
           <a
             key={`${item.url}-${i}`}
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block rounded-md p-3 transition-colors hover:bg-accent"
+            className="block px-4 py-3 transition-colors hover:bg-muted/50"
           >
             <p className="text-sm font-medium leading-snug line-clamp-2">
               {item.headline}
@@ -225,22 +250,24 @@ function RelatedStocks({
   if (related.length === 0) return null;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden border-border/50">
+      <CardHeader className="border-b border-border/40 bg-muted/20">
         <CardTitle className="flex items-center gap-2 text-base">
-          <TrendingUp className="h-4 w-4" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
+            <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
+          </div>
           Related Stocks
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4">
         <div className="flex flex-wrap gap-2">
           {related.map((r) => (
             <Link
               key={r.symbol}
               href={`/stocks/${r.symbol}`}
-              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+              className="group inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-muted/30 px-3 py-2 text-sm transition-all hover:bg-primary/5 hover:border-primary/20 hover:shadow-sm"
             >
-              <span className="font-medium">{r.symbol}</span>
+              <span className="font-semibold group-hover:text-primary transition-colors">{r.symbol}</span>
               <span className="text-muted-foreground truncate max-w-[120px]">
                 {r.name}
               </span>
@@ -321,31 +348,31 @@ export default async function StockPage({ params }: StockPageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      {/* Back Link */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Markets
-      </Link>
+    <div className="gradient-mesh">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        {/* Back Link */}
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+          Back to Markets
+        </Link>
 
-      {/* Header + Stats */}
-      <StockHeader symbol={symbol} quote={quote} profile={profile} />
+        {/* Header + Stats */}
+        <StockHeader symbol={symbol} quote={quote} profile={profile} />
 
-      <Separator />
+        {/* Chart with time range */}
+        <StockChart symbol={symbol} bars={bars} />
 
-      {/* Chart with time range */}
-      <StockChart symbol={symbol} bars={bars} />
+        {/* Company About */}
+        <CompanyAbout symbol={symbol} profile={profile} />
 
-      {/* Company About */}
-      <CompanyAbout symbol={symbol} profile={profile} />
-
-      {/* Two-column: News + Related */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <StockNews news={news} />
-        <RelatedStocks related={related} />
+        {/* Two-column: News + Related */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <StockNews news={news} />
+          <RelatedStocks related={related} />
+        </div>
       </div>
     </div>
   );

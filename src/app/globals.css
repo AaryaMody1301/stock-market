@@ -130,6 +130,83 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-sans scroll-smooth;
   }
+}
+
+/* Ticker tape animation */
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.animate-ticker {
+  animation: ticker linear infinite;
+}
+
+/* Gradient mesh background */
+.gradient-mesh {
+  background-image:
+    radial-gradient(at 27% 37%, oklch(0.6 0.15 250 / 8%) 0px, transparent 50%),
+    radial-gradient(at 97% 21%, oklch(0.5 0.2 270 / 6%) 0px, transparent 50%),
+    radial-gradient(at 52% 99%, oklch(0.55 0.18 160 / 5%) 0px, transparent 50%),
+    radial-gradient(at 10% 29%, oklch(0.6 0.14 200 / 4%) 0px, transparent 50%);
+}
+.dark .gradient-mesh {
+  background-image:
+    radial-gradient(at 27% 37%, oklch(0.3 0.1 250 / 15%) 0px, transparent 50%),
+    radial-gradient(at 97% 21%, oklch(0.25 0.15 270 / 12%) 0px, transparent 50%),
+    radial-gradient(at 52% 99%, oklch(0.3 0.12 160 / 10%) 0px, transparent 50%),
+    radial-gradient(at 10% 29%, oklch(0.3 0.08 200 / 8%) 0px, transparent 50%);
+}
+
+/* Glassmorphism card variant */
+.glass {
+  background: oklch(1 0 0 / 60%);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid oklch(1 0 0 / 20%);
+}
+.dark .glass {
+  background: oklch(0.2 0 0 / 50%);
+  border: 1px solid oklch(1 0 0 / 8%);
+}
+
+/* Animated gradient for premium hero */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Subtle float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px oklch(0.6 0.15 250 / 20%); }
+  50% { box-shadow: 0 0 20px oklch(0.6 0.15 250 / 40%); }
+}
+.animate-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
 }

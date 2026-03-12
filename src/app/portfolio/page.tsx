@@ -113,42 +113,51 @@ export default function PortfolioPage() {
 
   if (holdings.length === 0) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        <section>
-          <div className="flex items-center gap-3">
-            <Briefcase className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
-              <p className="text-muted-foreground">
-                Track your investments and monitor performance
-              </p>
+      <div className="gradient-mesh">
+        <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+          <section>
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <Briefcase className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
+                <p className="text-muted-foreground">
+                  Track your investments and monitor performance
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <div className="py-16 text-center">
-          <PieChart className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No holdings yet</h2>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Add stocks to your portfolio from any stock detail page to start
-            tracking your investments and P&L.
-          </p>
-          <Link href="/">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Browse Markets
-            </Button>
-          </Link>
+          <div className="py-16 text-center">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/50">
+              <PieChart className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">No holdings yet</h2>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Add stocks to your portfolio from any stock detail page to start
+              tracking your investments and P&L.
+            </p>
+            <Link href="/">
+              <Button size="lg" className="shadow-lg shadow-primary/25">
+                <Plus className="mr-2 h-4 w-4" />
+                Browse Markets
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <section className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Briefcase className="h-8 w-8 text-primary" />
+    <div className="gradient-mesh">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <section className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Briefcase className="h-6 w-6 text-primary" />
+            </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
             <p className="text-muted-foreground">
@@ -339,6 +348,7 @@ export default function PortfolioPage() {
           </TableBody>
         </Table>
       </div>
+      </div>
     </div>
   );
 }
@@ -368,11 +378,11 @@ function MetricCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <Card>
+    <Card className="overflow-hidden border-border/50 bg-gradient-to-br from-muted/30 to-transparent transition-all hover:shadow-md hover:border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">{label}</p>
-          {icon}
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          {icon && <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50">{icon}</div>}
         </div>
         <p className={cn("text-xl font-bold tabular-nums mt-1", className)}>
           {value}

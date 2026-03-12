@@ -51,42 +51,51 @@ export default function WatchlistPage() {
 
   if (symbols.length === 0) {
     return (
-      <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        <section>
-          <div className="flex items-center gap-3">
-            <Eye className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Watchlist</h1>
-              <p className="text-muted-foreground">
-                Track your favorite stocks in one place
-              </p>
+      <div className="gradient-mesh">
+        <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+          <section>
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <Eye className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Watchlist</h1>
+                <p className="text-muted-foreground">
+                  Track your favorite stocks in one place
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <div className="py-16 text-center">
-          <Star className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Your watchlist is empty</h2>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Start adding stocks to your watchlist by clicking the star icon on any
-            stock page, or search for stocks to add.
-          </p>
-          <Link href="/">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Browse Markets
-            </Button>
-          </Link>
+          <div className="py-16 text-center">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/50">
+              <Star className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Your watchlist is empty</h2>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Start adding stocks to your watchlist by clicking the star icon on any
+              stock page, or search for stocks to add.
+            </p>
+            <Link href="/">
+              <Button size="lg" className="shadow-lg shadow-primary/25">
+                <Plus className="mr-2 h-4 w-4" />
+                Browse Markets
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <section className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Eye className="h-8 w-8 text-primary" />
+    <div className="gradient-mesh">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <section className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Eye className="h-6 w-6 text-primary" />
+            </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Watchlist</h1>
             <p className="text-muted-foreground">
@@ -187,6 +196,7 @@ export default function WatchlistPage() {
           </TableBody>
         </Table>
       </div>
+      </div>
     </div>
   );
 }
@@ -201,9 +211,9 @@ function SummaryCard({
   className?: string;
 }) {
   return (
-    <Card>
+    <Card className="overflow-hidden border-border/50 bg-gradient-to-br from-muted/30 to-transparent transition-all hover:shadow-md hover:border-border">
       <CardContent className="p-4">
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <p className={`text-2xl font-bold tabular-nums ${className || ""}`}>{value}</p>
       </CardContent>
     </Card>

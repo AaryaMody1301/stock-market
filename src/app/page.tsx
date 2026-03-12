@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { marketData } from "@/lib/providers";
 import { MarketTable } from "@/components/markets/market-table";
-import { QuoteCard } from "@/components/markets/quote-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,14 +10,17 @@ import {
   TrendingUp,
   TrendingDown,
   BarChart3,
-  Zap,
-  Newspaper,
-  GitCompareArrows,
-  Eye,
-  Briefcase,
+  Activity,
+  Globe,
+  ChevronRight,
 } from "lucide-react";
 import { formatPrice } from "@/components/markets/quote-helpers";
 import type { Quote } from "@/lib/providers/types";
+import { HeroSection } from "@/components/home/hero-section";
+import { TickerTapeServer } from "@/components/home/ticker-tape-server";
+import { AnimatedQuoteCards } from "@/components/home/animated-quote-cards";
+import { MarketPulseCards } from "@/components/home/market-pulse-cards";
+import { QuickActions } from "@/components/home/quick-actions";
 
 // Force dynamic rendering — data changes every few seconds
 export const dynamic = "force-dynamic";
@@ -34,16 +36,6 @@ const SECTOR_SYMBOLS: Record<string, string[]> = {
   healthcare: ["JNJ", "UNH", "PFE", "ABBV", "MRK"],
 };
 
-function QuoteCardsSkeleton() {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Skeleton key={i} className="h-[100px] rounded-lg" />
-      ))}
-    </div>
-  );
-}
-
 function MarketTableSkeleton() {
   return (
     <div className="space-y-2">
@@ -56,17 +48,36 @@ function MarketTableSkeleton() {
 
 function GainersLosersSkeleton() {
   return (
-    <div className="space-y-2">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Skeleton key={i} className="h-10 w-full rounded-md" />
+    <div className="grid gap-4 sm:grid-cols-2">
+      {[1, 2].map((i) => (
+        <Skeleton key={i} className="h-64 rounded-xl" />
       ))}
     </div>
   );
 }
 
-async function TrendingQuotes() {
-  const quotes = await marketData.getQuotes(TRENDING_SYMBOLS);
+function PulseSkeleton() {
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {[1, 2, 3].map((i) => (
+        <Skeleton key={i} className="h-24 rounded-xl" />
+      ))}
+    </div>
+  );
+}
 
+function QuoteCardsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Skeleton key={i} className="h-[120px] rounded-xl" />
+      ))}
+    </div>
+  );
+}
+
+async function TrendingQuotesServer() {
+  const quotes = await marketData.getQuotes(TRENDING_SYMBOLS);
   if (quotes.length === 0) {
     return (
       <div className="py-12 text-center text-muted-foreground">
@@ -75,14 +86,7 @@ async function TrendingQuotes() {
       </div>
     );
   }
-
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-      {quotes.slice(0, 5).map((q) => (
-        <QuoteCard key={q.symbol} quote={q} />
-      ))}
-    </div>
-  );
+  return <AnimatedQuoteCards quotes={quotes.slice(0, 5)} />;
 }
 
 async function SectorTable({ sector }: { sector: string }) {
@@ -106,10 +110,12 @@ async function GainersLosers() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Card>
+      <Card className="overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="h-4 w-4 text-emerald-500" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            </div>
             Top Gainers
           </CardTitle>
         </CardHeader>
@@ -121,10 +127,12 @@ async function GainersLosers() {
           )}
         </CardContent>
       </Card>
-      <Card>
+      <Card className="overflow-hidden border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingDown className="h-4 w-4 text-red-500" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10">
+              <TrendingDown className="h-4 w-4 text-red-500" />
+            </div>
             Top Losers
           </CardTitle>
         </CardHeader>
@@ -144,17 +152,22 @@ function MiniQuoteRow({ quote }: { quote: Quote }) {
   return (
     <Link
       href={`/stocks/${quote.symbol}`}
-      className="flex items-center justify-between rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
+      className="flex items-center justify-between rounded-lg px-3 py-2 transition-all hover:bg-muted/50 hover:translate-x-1"
     >
-      <span className="text-sm font-semibold">{quote.symbol}</span>
+      <div className="flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-xs font-bold">
+          {quote.symbol.slice(0, 2)}
+        </div>
+        <span className="text-sm font-semibold">{quote.symbol}</span>
+      </div>
       <div className="flex items-center gap-3">
         <span className="text-sm font-mono tabular-nums">{formatPrice(quote.price)}</span>
         <Badge
           variant="secondary"
           className={
             quote.changePct >= 0
-              ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-red-500/10 text-red-500"
+              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+              : "bg-red-500/10 text-red-500 border-red-500/20"
           }
         >
           {quote.changePct >= 0 ? "+" : ""}
@@ -165,192 +178,134 @@ function MiniQuoteRow({ quote }: { quote: Quote }) {
   );
 }
 
-async function MarketPulse() {
+async function MarketPulseServer() {
   const quotes = await marketData.getQuotes(TRENDING_SYMBOLS);
   if (quotes.length === 0) return null;
 
-  const avgChange =
-    quotes.reduce((s, q) => s + q.changePct, 0) / quotes.length;
+  const avgChange = quotes.reduce((s, q) => s + q.changePct, 0) / quotes.length;
   const gainers = quotes.filter((q) => q.changePct > 0).length;
   const losers = quotes.filter((q) => q.changePct < 0).length;
 
   return (
-    <div className="grid grid-cols-3 gap-3">
-      <Card>
-        <CardContent className="p-4 text-center">
-          <p className="text-xs text-muted-foreground">Market Mood</p>
-          <p
-            className={`text-lg font-bold ${avgChange >= 0 ? "text-emerald-500" : "text-red-500"}`}
-          >
-            {avgChange >= 0 ? "Bullish" : "Bearish"}
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4 text-center">
-          <p className="text-xs text-muted-foreground">Gainers</p>
-          <p className="text-lg font-bold text-emerald-500">{gainers}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4 text-center">
-          <p className="text-xs text-muted-foreground">Losers</p>
-          <p className="text-lg font-bold text-red-500">{losers}</p>
-        </CardContent>
-      </Card>
-    </div>
+    <MarketPulseCards
+      avgChange={avgChange}
+      gainers={gainers}
+      losers={losers}
+      total={quotes.length}
+    />
   );
+}
+
+async function TickerTapeDataProvider() {
+  const quotes = await marketData.getQuotes(TRENDING_SYMBOLS);
+  if (quotes.length === 0) return null;
+  return <TickerTapeServer quotes={quotes} />;
 }
 
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      {/* Hero */}
-      <section>
-        <div className="flex items-center gap-3 mb-2">
-          <Zap className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              InvestSmart Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Real-time market data, portfolio tracking, and smart analytics
-            </p>
-          </div>
-        </div>
+    <div className="relative">
+      {/* Ticker Tape */}
+      <Suspense fallback={null}>
+        <TickerTapeDataProvider />
+      </Suspense>
 
-        {/* Quick Action Cards */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <QuickAction
-            href="/watchlist"
-            icon={<Eye className="h-5 w-5" />}
-            label="Watchlist"
-            desc="Track favorites"
-          />
-          <QuickAction
-            href="/portfolio"
-            icon={<Briefcase className="h-5 w-5" />}
-            label="Portfolio"
-            desc="Your holdings"
-          />
-          <QuickAction
-            href="/compare"
-            icon={<GitCompareArrows className="h-5 w-5" />}
-            label="Compare"
-            desc="Side by side"
-          />
-          <QuickAction
-            href="/news"
-            icon={<Newspaper className="h-5 w-5" />}
-            label="News"
-            desc="Market updates"
-          />
-        </div>
-      </section>
+      {/* Gradient mesh background */}
+      <div className="gradient-mesh">
+        <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
+          {/* Premium Hero Section */}
+          <HeroSection />
 
-      {/* Market Pulse */}
-      <section>
-        <Suspense
-          fallback={
-            <div className="grid grid-cols-3 gap-3">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-20 rounded-lg" />
-              ))}
+          {/* Quick Action Cards */}
+          <QuickActions />
+
+          {/* Market Pulse */}
+          <section>
+            <div className="flex items-center gap-2 mb-5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <h2 className="text-lg font-semibold">Market Pulse</h2>
             </div>
-          }
-        >
-          <MarketPulse />
-        </Suspense>
-      </section>
+            <Suspense fallback={<PulseSkeleton />}>
+              <MarketPulseServer />
+            </Suspense>
+          </section>
 
-      {/* Trending Cards */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-emerald-500" />
-            Trending
-          </h2>
+          {/* Trending Cards */}
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+                  <TrendingUp className="h-4 w-4 text-emerald-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Trending Stocks</h2>
+              </div>
+              <Link
+                href="/watchlist"
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View all <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <Suspense fallback={<QuoteCardsSkeleton />}>
+              <TrendingQuotesServer />
+            </Suspense>
+          </section>
+
+          {/* Gainers & Losers */}
+          <section>
+            <div className="flex items-center gap-2 mb-5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <h2 className="text-lg font-semibold">Top Movers</h2>
+            </div>
+            <Suspense fallback={<GainersLosersSkeleton />}>
+              <GainersLosers />
+            </Suspense>
+          </section>
+
+          {/* Sector Tabs + Full Table */}
+          <section>
+            <div className="flex items-center gap-2 mb-5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <h2 className="text-lg font-semibold">Market Overview</h2>
+            </div>
+
+            <Tabs defaultValue="all">
+              <TabsList className="bg-muted/50 backdrop-blur-sm">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="tech">Tech</TabsTrigger>
+                <TabsTrigger value="finance">Finance</TabsTrigger>
+                <TabsTrigger value="healthcare">Healthcare</TabsTrigger>
+              </TabsList>
+              <TabsContent value="all" className="mt-4">
+                <Suspense fallback={<MarketTableSkeleton />}>
+                  <FullMarketTable />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="tech" className="mt-4">
+                <Suspense fallback={<MarketTableSkeleton />}>
+                  <SectorTable sector="tech" />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="finance" className="mt-4">
+                <Suspense fallback={<MarketTableSkeleton />}>
+                  <SectorTable sector="finance" />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="healthcare" className="mt-4">
+                <Suspense fallback={<MarketTableSkeleton />}>
+                  <SectorTable sector="healthcare" />
+                </Suspense>
+              </TabsContent>
+            </Tabs>
+          </section>
         </div>
-        <Suspense fallback={<QuoteCardsSkeleton />}>
-          <TrendingQuotes />
-        </Suspense>
-      </section>
-
-      {/* Gainers & Losers */}
-      <section>
-        <h2 className="mb-4 text-lg font-semibold flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-muted-foreground" />
-          Top Movers
-        </h2>
-        <Suspense fallback={<GainersLosersSkeleton />}>
-          <GainersLosers />
-        </Suspense>
-      </section>
-
-      {/* Sector Tabs + Full Table */}
-      <section>
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">Market Overview</h2>
-        </div>
-
-        <Tabs defaultValue="all">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="tech">Tech</TabsTrigger>
-            <TabsTrigger value="finance">Finance</TabsTrigger>
-            <TabsTrigger value="healthcare">Healthcare</TabsTrigger>
-          </TabsList>
-          <TabsContent value="all" className="mt-4">
-            <Suspense fallback={<MarketTableSkeleton />}>
-              <FullMarketTable />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="tech" className="mt-4">
-            <Suspense fallback={<MarketTableSkeleton />}>
-              <SectorTable sector="tech" />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="finance" className="mt-4">
-            <Suspense fallback={<MarketTableSkeleton />}>
-              <SectorTable sector="finance" />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="healthcare" className="mt-4">
-            <Suspense fallback={<MarketTableSkeleton />}>
-              <SectorTable sector="healthcare" />
-            </Suspense>
-          </TabsContent>
-        </Tabs>
-      </section>
+      </div>
     </div>
-  );
-}
-
-function QuickAction({
-  href,
-  icon,
-  label,
-  desc,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  desc: string;
-}) {
-  return (
-    <Link href={href}>
-      <Card className="transition-all hover:shadow-md hover:border-primary/20 cursor-pointer">
-        <CardContent className="flex items-center gap-3 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            {icon}
-          </div>
-          <div>
-            <p className="text-sm font-semibold">{label}</p>
-            <p className="text-xs text-muted-foreground">{desc}</p>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
   );
 }
