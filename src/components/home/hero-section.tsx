@@ -5,8 +5,6 @@ import { TrendingUp, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const words = ["Smarter", "Faster", "Better"];
-
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-primary/5 p-8 sm:p-12">

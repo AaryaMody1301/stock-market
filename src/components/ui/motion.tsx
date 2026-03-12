@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 interface FadeInProps {
   children: React.ReactNode;
@@ -48,14 +47,7 @@ interface StaggerChildrenProps {
   once?: boolean;
 }
 
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-};
+
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },

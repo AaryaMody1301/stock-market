@@ -12,7 +12,6 @@ interface GlowCardProps {
 export function GlowCard({
   children,
   className,
-  glowColor = "primary",
 }: GlowCardProps) {
   return (
     <motion.div
