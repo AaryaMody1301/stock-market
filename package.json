@@ -20,6 +20,7 @@
     "release:check": "node scripts/check-release.mjs",
     "demo:seed": "tsx scripts/seed-demo.ts",
     "smoke:demo": "node scripts/smoke-demo.mjs",
+    "browser:demo": "npm exec --yes --package=playwright@1.62.1 -- node scripts/browser-demo.mjs",
     "ingest:sec": "tsx scripts/ingest-sec.ts"
   },
   "dependencies": {
