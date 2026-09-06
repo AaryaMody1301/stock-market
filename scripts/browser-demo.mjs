@@ -38,6 +38,10 @@ function resolvePlaywright() {
   );
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function waitForHttp(pathname, { timeoutMs = 30_000, expectedStatus = 200 } = {}) {
   const deadline = Date.now() + timeoutMs;
   let lastError;
@@ -113,7 +117,10 @@ async function runBrowserWorkflow() {
     viewport: { width: 1440, height: 1000 },
   });
   const page = await context.newPage();
-  const field = (name) => page.getByLabel(name, { exact: true });
+  const textbox = (name) =>
+    page.getByRole("textbox", {
+      name: new RegExp(`^${escapeRegExp(name)}(?:\\s|$)`),
+    });
 
   const initialSummary =
     "Browser acceptance thesis: durable evidence should remain reviewable and falsifiable across sessions.";
@@ -125,14 +132,14 @@ async function runBrowserWorkflow() {
   await waitForVisible(page.getByText("Demo mode:", { exact: false }), "synthetic-data disclosure");
 
   await page.getByRole("button", { name: "New thesis", exact: true }).click();
-  await field("Ticker").fill("DEMO");
-  await field("Title").fill("Browser acceptance research thesis");
-  await field("Core thesis").fill(initialSummary);
-  await field("Assumptions").fill("Revenue remains measurable\nEvidence stays attributable");
-  await field("Catalysts").fill("New comparable filing evidence");
-  await field("Risks").fill("Evidence quality deteriorates");
-  await field("Invalidation criteria").fill("Primary-source evidence contradicts the core thesis");
-  await field("Save note").fill("Browser acceptance initial thesis");
+  await textbox("Ticker").fill("DEMO");
+  await textbox("Title").fill("Browser acceptance research thesis");
+  await textbox("Core thesis").fill(initialSummary);
+  await textbox("Assumptions").fill("Revenue remains measurable\nEvidence stays attributable");
+  await textbox("Catalysts").fill("New comparable filing evidence");
+  await textbox("Risks").fill("Evidence quality deteriorates");
+  await textbox("Invalidation criteria").fill("Primary-source evidence contradicts the core thesis");
+  await textbox("Save note").fill("Browser acceptance initial thesis");
   await page.getByRole("button", { name: "Save thesis", exact: true }).click();
   await waitForVisible(
     page.getByText("Saved DEMO. Revision history is preserved locally.", { exact: true }),
@@ -141,11 +148,11 @@ async function runBrowserWorkflow() {
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForVisible(page.getByText("Research loaded from this browser.", { exact: true }), "IndexedDB reload status");
-  await expectInputValue(field("Ticker"), "DEMO", "persisted ticker");
-  await expectInputValue(field("Core thesis"), initialSummary, "persisted core thesis");
+  await expectInputValue(textbox("Ticker"), "DEMO", "persisted ticker");
+  await expectInputValue(textbox("Core thesis"), initialSummary, "persisted core thesis");
 
-  await field("Core thesis").fill(updatedSummary);
-  await field("Save note").fill("Browser acceptance second revision");
+  await textbox("Core thesis").fill(updatedSummary);
+  await textbox("Save note").fill("Browser acceptance second revision");
   await page.getByRole("button", { name: "Save thesis", exact: true }).click();
   await waitForVisible(
     page.getByText("Saved DEMO. Revision history is preserved locally.", { exact: true }),
@@ -159,7 +166,7 @@ async function runBrowserWorkflow() {
     page.getByText("Revision restored to the editor. Review it and save to create a new revision.", { exact: true }),
     "revision restore confirmation",
   );
-  await expectInputValue(field("Core thesis"), initialSummary, "restored core thesis");
+  await expectInputValue(textbox("Core thesis"), initialSummary, "restored core thesis");
 
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export", exact: true }).click();
