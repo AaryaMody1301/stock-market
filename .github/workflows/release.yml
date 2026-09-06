@@ -68,6 +68,19 @@ jobs:
       - name: Build production application
         run: npm run build
 
+      - name: Verify credential-free demo seed is idempotent
+        env:
+          STOCKPULSE_DEMO_MODE: "true"
+        run: |
+          npm run demo:seed
+          npm run demo:seed
+
+      - name: Smoke production demo
+        env:
+          STOCKPULSE_DEMO_MODE: "true"
+          SMOKE_PORT: "3210"
+        run: npm run smoke:demo
+
       - name: Generate production dependency SBOM
         run: |
           mkdir -p release-artifacts
