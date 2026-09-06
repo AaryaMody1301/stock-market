@@ -34,19 +34,18 @@ The production demo smoke starts the built `server.js` entry point and verifies:
 - `/api/health` reports the StockPulse process healthy;
 - `/api/ready` reports PostgreSQL reachable and `demo` as the only market provider;
 - synthetic `DEMO` and `AAPL` quotes are returned without live provider credentials;
-- the homepage renders the persistent synthetic-data disclosure;
-- `/stocks/DEMO`, `/stocks/DEMO/changes`, `/stocks/DEMO/grounding`, and `/news` render successfully from the seeded reviewer dataset.
+- the homepage and `/stocks/DEMO`, `/stocks/DEMO/changes`, `/stocks/DEMO/grounding`, and `/news` routes render successfully from the seeded reviewer dataset.
 
 The browser reviewer gate then uses a clean Chromium context against the same built production server to verify user-visible browser state:
 
+- the runtime data-mode disclosure resolves to demo mode after hydration, even on statically prerendered routes;
 - create a complete `DEMO` thesis through the `/research` UI;
 - reload and recover that thesis from IndexedDB;
 - save a second thesis version and restore the previous revision into the editor;
 - export the validated versioned thesis bundle;
 - delete the local thesis and import the exported bundle back through the UI;
 - add `DEMO` with the actual Watch button and confirm the watchlist survives reload/navigation through localStorage;
-- remove `DEMO` and confirm the removal also persists;
-- keep the demo disclosure visible throughout the credential-free workflow.
+- remove `DEMO` and confirm the removal also persists.
 
 The browser tool is intentionally not part of the application dependency graph. CI invokes a version-pinned Playwright package only for acceptance and installs only Chromium plus its Linux dependencies. This keeps the production lockfile and SBOM focused on shipped application dependencies.
 
@@ -86,7 +85,7 @@ The SEC currently limits automated access to 10 requests per second in total and
 
 ### Browser research workflow
 
-The automated Chromium gate now proves the local browser mechanics for thesis persistence, revision restore, export/import, and watchlist persistence using synthetic demo data. The release-candidate environment still needs a short live-evidence browser pass because CI deliberately does not contact SEC or market providers:
+The automated Chromium gate now proves the local browser mechanics for thesis persistence, revision restore, export/import, watchlist persistence, and runtime demo disclosure using synthetic demo data. The release-candidate environment still needs a short live-evidence browser pass because CI deliberately does not contact SEC or market providers:
 
 1. open a real stock page with stored SEC evidence;
 2. inspect deterministic changes and provenance links;
