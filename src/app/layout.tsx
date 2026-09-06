@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteHeader } from "@/components/site-header";
 import { getAppUrl } from "@/lib/app-url";
+import { isDemoMode } from "@/lib/demo-mode";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -27,6 +28,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const demoMode = isDemoMode();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
@@ -40,6 +43,14 @@ export default function RootLayout({
             </a>
             <div className="relative flex min-h-screen flex-col">
               <SiteHeader />
+              {demoMode ? (
+                <div
+                  role="status"
+                  className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs font-medium text-amber-900 dark:text-amber-200"
+                >
+                  Demo mode: prices, charts, search results, profiles, and news are deterministic synthetic fixtures. No Finnhub or Twelve Data requests are made.
+                </div>
+              ) : null}
               <main id="main-content" className="flex-1">{children}</main>
               <footer className="border-t border-border/40 bg-muted/20">
                 <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -51,7 +62,9 @@ export default function RootLayout({
                       <span className="text-foreground/80">StockPulse</span>
                     </div>
                     <p className="text-center text-xs text-muted-foreground">
-                      &copy; {new Date().getFullYear()} StockPulse. Market data may come from Finnhub and Twelve Data; filing evidence comes from SEC EDGAR. Research tool, not investment advice.
+                      {demoMode
+                        ? `© ${new Date().getFullYear()} StockPulse. Demo market data is synthetic and deterministic; seeded evidence is clearly marked as fixture data. Research tool, not investment advice.`
+                        : `© ${new Date().getFullYear()} StockPulse. Market data may come from Finnhub and Twelve Data; filing evidence comes from SEC EDGAR. Research tool, not investment advice.`}
                     </p>
                   </div>
                 </div>
