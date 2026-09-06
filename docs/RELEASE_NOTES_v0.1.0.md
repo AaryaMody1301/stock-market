@@ -28,9 +28,12 @@ The release gate runs against PostgreSQL 16 and requires:
 - automated tests, including a no-network demo regression;
 - production Next.js build;
 - two consecutive demo-seed executions to prove idempotency;
-- production-server smoke validation of health, readiness, synthetic quotes, the demo disclosure, and the primary reviewer routes while live provider/SEC/AI credentials are blanked.
+- production-server smoke validation of health, readiness, synthetic quotes, the demo disclosure, and the primary reviewer routes while live provider/SEC/AI credentials are blanked;
+- Chromium browser acceptance for IndexedDB thesis persistence, revision restore, versioned export/delete/import, and watchlist localStorage persistence.
 
-Tagged releases rerun the same production demo smoke before publishing and also attach a CycloneDX SBOM for production dependencies.
+The browser acceptance tool is version-pinned and installed only for CI/release validation, so it does not become a shipped StockPulse dependency or expand the production SBOM.
+
+Tagged releases rerun both the production-server smoke and the browser reviewer workflow before publishing, then attach a CycloneDX SBOM for production dependencies.
 
 ## Demo-data boundary
 
@@ -46,4 +49,4 @@ Market-data provider credentials and public display/redistribution rights remain
 
 ## Release acceptance
 
-See `docs/RELEASE.md` for the full clean-environment gate and `docs/DEMO.md` for the credential-free reviewer path. A green source workflow proves the repository-level build/migration/test/demo-smoke gate; it does not by itself prove production credentials, provider entitlements, PostgreSQL backup/restore, reverse-proxy/TLS behavior, browser-local interaction correctness, or optional AI credentials.
+See `docs/RELEASE.md` for the full clean-environment gate and `docs/DEMO.md` for the credential-free reviewer path. A green source workflow proves the repository-level build/migration/test/demo-smoke/browser-state gate; it does not by itself prove production credentials, provider entitlements, PostgreSQL backup/restore, reverse-proxy/TLS behavior, live provider/SEC behavior, or optional AI credentials.
