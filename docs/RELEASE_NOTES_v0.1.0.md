@@ -27,9 +27,10 @@ The release gate runs against PostgreSQL 16 and requires:
 - ESLint;
 - automated tests, including a no-network demo regression;
 - production Next.js build;
-- two consecutive demo-seed executions to prove idempotency.
+- two consecutive demo-seed executions to prove idempotency;
+- production-server smoke validation of health, readiness, synthetic quotes, the demo disclosure, and the primary reviewer routes while live provider/SEC/AI credentials are blanked.
 
-Tagged releases also publish a CycloneDX SBOM for production dependencies.
+Tagged releases rerun the same production demo smoke before publishing and also attach a CycloneDX SBOM for production dependencies.
 
 ## Demo-data boundary
 
@@ -45,4 +46,4 @@ Market-data provider credentials and public display/redistribution rights remain
 
 ## Release acceptance
 
-See `docs/RELEASE.md` for the full clean-environment gate and `docs/DEMO.md` for the credential-free reviewer path. A green source workflow does not by itself prove production credentials, provider entitlements, PostgreSQL backup/restore, reverse-proxy/TLS behavior, or optional AI credentials.
+See `docs/RELEASE.md` for the full clean-environment gate and `docs/DEMO.md` for the credential-free reviewer path. A green source workflow proves the repository-level build/migration/test/demo-smoke gate; it does not by itself prove production credentials, provider entitlements, PostgreSQL backup/restore, reverse-proxy/TLS behavior, browser-local interaction correctness, or optional AI credentials.
