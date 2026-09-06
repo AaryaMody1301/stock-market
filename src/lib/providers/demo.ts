@@ -20,6 +20,7 @@ interface DemoInstrument {
 const DEMO_TIMESTAMP = Math.floor(Date.parse("2026-08-28T20:00:00Z") / 1000);
 
 const INSTRUMENTS: DemoInstrument[] = [
+  { symbol: "DEMO", name: "StockPulse Demo Corp.", sector: "Demo Sector", industry: "Synthetic Demo Data", basePrice: 125, exchange: "DEMO" },
   { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", industry: "Consumer Electronics", basePrice: 228, exchange: "NASDAQ" },
   { symbol: "MSFT", name: "Microsoft Corporation", sector: "Technology", industry: "Software", basePrice: 515, exchange: "NASDAQ" },
   { symbol: "GOOGL", name: "Alphabet Inc.", sector: "Technology", industry: "Internet Services", basePrice: 205, exchange: "NASDAQ" },
