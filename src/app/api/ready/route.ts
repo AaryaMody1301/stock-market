@@ -16,6 +16,7 @@ export async function GET() {
       status: ready ? "ready" : "not-ready",
       service: "stockpulse-web",
       timestamp: new Date().toISOString(),
+      mode: configuration.demoMode ? "demo" : "live",
       checks: {
         database: {
           configured: configuration.databaseConfigured,
@@ -24,6 +25,7 @@ export async function GET() {
         marketData: {
           configured: configuration.marketDataConfigured,
           providers: configuration.marketProviders,
+          syntheticDemoData: configuration.demoMode,
         },
         secIngestion: {
           configured: configuration.secIngestionConfigured,
