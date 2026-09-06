@@ -16,7 +16,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stockpulse_ci?schema=public
 
@@ -75,3 +75,12 @@ jobs:
           STOCKPULSE_DEMO_MODE: "true"
           SMOKE_PORT: "3210"
         run: npm run smoke:demo
+
+      - name: Install pinned Chromium acceptance browser
+        run: npx --yes playwright@1.62.1 install --with-deps chromium
+
+      - name: Browser reviewer workflow
+        env:
+          STOCKPULSE_DEMO_MODE: "true"
+          BROWSER_SMOKE_PORT: "3211"
+        run: npm run browser:demo
