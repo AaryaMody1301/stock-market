@@ -131,7 +131,7 @@ async function main() {
     cik: DEMO_CIK,
     taxonomy: metric.taxonomy,
     concept: metric.concept,
-    label: `Synthetic ${metric.metric.replaceAll("_", " ")}`,
+    label: `Synthetic ${metric.metric.replace(/_/g, " ")}`,
     description: "Deterministic StockPulse demo fixture. This is not an SEC-reported fact.",
     unit: metric.unit,
     value: metric.value,
