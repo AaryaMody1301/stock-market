@@ -1,5 +1,7 @@
 import { finnhub, getCompanyNews } from "./finnhub";
 import { twelvedata } from "./twelvedata";
+import { demoMarketData, getDemoCompanyNews } from "./demo";
+import { isDemoMode } from "@/lib/demo-mode";
 import { normalizeStockSymbol } from "@/lib/symbols";
 import type { MarketDataProvider, Quote, SymbolSearchResult, CompanyProfileData, DailyBarData, MarketNewsItem } from "./types";
 
@@ -27,7 +29,8 @@ export function normalizeSearchResults(results: SymbolSearchResult[]): SymbolSea
 
 /**
  * Unified market data service with automatic fallback.
- * Primary: Finnhub | Backup: Twelve Data
+ * Live: Finnhub primary | Twelve Data backup.
+ * Demo: deterministic local fixtures only; live providers are never contacted.
  */
 class MarketDataService {
   private primary: MarketDataProvider = finnhub;
@@ -36,6 +39,8 @@ class MarketDataService {
   private async withFallback<T>(
     fn: (provider: MarketDataProvider) => Promise<T>,
   ): Promise<T> {
+    if (isDemoMode()) return fn(demoMarketData);
+
     try {
       return await fn(this.primary);
     } catch (primaryErr) {
@@ -68,6 +73,8 @@ class MarketDataService {
 
   async getCompanyProfile(symbol: string): Promise<CompanyProfileData> {
     const s = normalizeStockSymbol(symbol);
+    if (isDemoMode()) return demoMarketData.getCompanyProfile(s);
+
     try {
       return await finnhub.getCompanyProfile(s);
     } catch (err) {
@@ -83,11 +90,13 @@ class MarketDataService {
   }
 
   async getMarketNews(category?: string): Promise<MarketNewsItem[]> {
+    if (isDemoMode()) return demoMarketData.getMarketNews(category);
     return finnhub.getMarketNews(category);
   }
 
   async getCompanyNews(symbol: string): Promise<MarketNewsItem[]> {
     const s = normalizeStockSymbol(symbol);
+    if (isDemoMode()) return getDemoCompanyNews(s);
     return getCompanyNews(s);
   }
 }
