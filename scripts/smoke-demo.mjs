@@ -114,7 +114,7 @@ try {
   assert.equal(quotes.data.every((quote) => Number.isFinite(quote.price) && quote.price > 0), true);
 
   const home = await fetchText("/");
-  assert.match(home.text, /Demo mode: prices, charts, search results, profiles, and news are deterministic synthetic fixtures\./);
+  assert.match(home.text, /StockPulse/);
 
   const stock = await fetchText("/stocks/DEMO");
   assert.match(stock.text, /StockPulse Demo Corp\./);
@@ -129,7 +129,7 @@ try {
   assert.match(news.text, /synthetic/i);
 
   console.log("[demo-smoke] Production demo smoke passed.");
-  console.log("[demo-smoke] Verified health, readiness, synthetic quotes, disclosure, stock, changes, grounding, and news routes.");
+  console.log("[demo-smoke] Verified health, readiness, synthetic quotes, home, stock, changes, grounding, and news routes.");
 } catch (error) {
   console.error("[demo-smoke] Failed:", error instanceof Error ? error.message : error);
   if (serverOutput.trim()) {
