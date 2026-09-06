@@ -19,6 +19,7 @@
     "audit:production": "node scripts/audit-production.mjs",
     "release:check": "node scripts/check-release.mjs",
     "demo:seed": "tsx scripts/seed-demo.ts",
+    "smoke:demo": "node scripts/smoke-demo.mjs",
     "ingest:sec": "tsx scripts/ingest-sec.ts"
   },
   "dependencies": {
