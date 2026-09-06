@@ -7,7 +7,7 @@ StockPulse v0.1.0 is the first evidence-first release candidate series for the c
 - Next.js 16 / React 19 application with PostgreSQL + Prisma persistence.
 - Canonical database-first live market-data reads with provider fallback and explicit stale/partial-data behavior.
 - Credential-free reviewer demo with deterministic synthetic quotes, charts, search, profiles, news, and idempotently seeded evidence for the fictional `DEMO` company.
-- Demo mode bypasses stored market rows and blocks Finnhub/Twelve Data request paths even when credentials are present; the UI and readiness response explicitly label synthetic data.
+- Demo mode bypasses stored market rows and blocks Finnhub/Twelve Data request paths even when credentials are present; the UI resolves its mode from runtime readiness so static pages cannot retain a stale build-time disclosure.
 - SEC EDGAR submissions/companyfacts ingestion with identified fair-access requests, bounded retries, deterministic normalization, provenance, and idempotent persistence in live mode.
 - Deterministic financial change intelligence that preserves reporting-context compatibility instead of comparing unlike periods.
 - Browser-local thesis workspace with assumptions, risks, catalysts, invalidation criteria, evidence relationships, revision history, review checkpoints, and export/import.
@@ -28,8 +28,8 @@ The release gate runs against PostgreSQL 16 and requires:
 - automated tests, including a no-network demo regression;
 - production Next.js build;
 - two consecutive demo-seed executions to prove idempotency;
-- production-server smoke validation of health, readiness, synthetic quotes, the demo disclosure, and the primary reviewer routes while live provider/SEC/AI credentials are blanked;
-- Chromium browser acceptance for IndexedDB thesis persistence, revision restore, versioned export/delete/import, and watchlist localStorage persistence.
+- production-server smoke validation of health, readiness, synthetic quotes, and the primary reviewer routes while live provider/SEC/AI credentials are blanked;
+- Chromium browser acceptance for the runtime demo disclosure, IndexedDB thesis persistence, revision restore, versioned export/delete/import, and watchlist localStorage persistence.
 
 The browser acceptance tool is version-pinned and installed only for CI/release validation, so it does not become a shipped StockPulse dependency or expand the production SBOM.
 
