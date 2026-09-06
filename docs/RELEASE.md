@@ -24,7 +24,17 @@ Every pull request to `main` must pass the normal CI workflow. A release tag rer
 7. ESLint;
 8. unit/integration tests;
 9. the production Next.js build;
-10. a production-dependency CycloneDX SBOM attached to the GitHub release.
+10. two consecutive credential-free demo seeds, proving the synthetic evidence fixture is idempotent;
+11. a production-server demo smoke using `npm run smoke:demo` with live market/SEC/AI credentials blanked;
+12. a production-dependency CycloneDX SBOM attached to the GitHub release.
+
+The production demo smoke starts the built `server.js` entry point and verifies:
+
+- `/api/health` reports the StockPulse process healthy;
+- `/api/ready` reports PostgreSQL reachable and `demo` as the only market provider;
+- synthetic `DEMO` and `AAPL` quotes are returned without live provider credentials;
+- the homepage renders the persistent synthetic-data disclosure;
+- `/stocks/DEMO`, `/stocks/DEMO/changes`, `/stocks/DEMO/grounding`, and `/news` render successfully from the seeded reviewer dataset.
 
 A tag must not publish a release if any source gate fails.
 
@@ -74,6 +84,8 @@ Using a clean browser profile:
 8. export and re-import the thesis data;
 9. verify malformed imports/storage remain rejected.
 
+The automated production smoke deliberately does not replace this browser-state acceptance check. IndexedDB/localStorage interaction remains a distinct release-candidate validation surface until browser automation is added.
+
 ### Optional grounded AI
 
 If AI is enabled in the intended deployment:
@@ -99,12 +111,13 @@ Promote to the stable tag only when:
 Recommended sequence:
 
 1. merge the release PR to `main`;
-2. tag `v0.1.0-rc.1` on that reviewed `main` commit;
-3. let `.github/workflows/release.yml` publish the prerelease and SBOM;
-4. execute the environment gate against the RC;
-5. fix release-only defects through normal PRs and issue another RC if necessary;
-6. tag `v0.1.0` only after acceptance passes.
+2. confirm normal `main` CI, including the production demo smoke, is green;
+3. tag `v0.1.0-rc.1` on that reviewed `main` commit;
+4. let `.github/workflows/release.yml` publish the prerelease and SBOM;
+5. execute the environment gate against the RC;
+6. fix release-only defects through normal PRs and issue another RC if necessary;
+7. tag `v0.1.0` only after acceptance passes.
 
 ## Explicit boundaries
 
-A green GitHub release workflow proves repository-level build/test/migration/audit checks for the tagged commit. It does not prove provider contracts, production secrets, live database backups, TLS/proxy correctness, exchange entitlements, or investment suitability.
+A green GitHub release workflow proves repository-level build/test/migration/audit/demo-smoke checks for the tagged commit. It does not prove provider contracts, production secrets, live database backups, TLS/proxy correctness, exchange entitlements, browser-local interaction correctness, or investment suitability.
