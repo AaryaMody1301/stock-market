@@ -2,11 +2,13 @@
 
 This document distinguishes **source-code completion** from **environment/operator validation**. The repository can be complete while a public production deployment still requires private credentials, contractual rights, infrastructure checks, and owner-level GitHub/legal decisions.
 
-## Source-code status
+## Current release state
 
 **Repository implementation: source-complete for the current StockPulse scope.**
 
-The checked-in application, workers, data model, evidence pipeline, thesis workflow, deterministic change intelligence, optional grounded AI, client-side portfolio/watchlist behavior, deployment examples, readiness/liveness probes, tests, and CI gates are implemented.
+The `v0.1.0` release series is prepared for release-candidate tagging. Normal CI validates version/release metadata, and `.github/workflows/release.yml` reruns the release-critical source gate on an exact `v0.1.0-rc.N` or `v0.1.0` tag before publishing a GitHub release with a production-dependency CycloneDX SBOM. No stable release should be tagged until the environment/operator gate in `docs/RELEASE.md` is completed for the intended deployment.
+
+The checked-in application, workers, data model, evidence pipeline, thesis workflow, deterministic change intelligence, optional grounded AI, client-side portfolio/watchlist behavior, deployment examples, readiness/liveness probes, tests, CI gates, and release automation are implemented.
 
 ### Foundation
 
@@ -15,6 +17,8 @@ The checked-in application, workers, data model, evidence pipeline, thesis workf
 - bounded process-local rate limiting;
 - non-overlapping/idempotent quote polling;
 - CI type/lint/test/build gates;
+- immutable SHA-pinned checkout/setup-node workflow actions;
+- deterministic release metadata validation;
 - truthful curated-market product wording;
 - separate liveness and readiness endpoints;
 - deployment, contribution, security, and release documentation.
@@ -77,7 +81,9 @@ The checked-in application, workers, data model, evidence pipeline, thesis workf
 - deterministic fallback when AI is absent/fails;
 - StockPulse branding/metadata cleanup;
 - architecture/operations/demo documentation;
-- PostgreSQL migration + idempotency verification in CI.
+- PostgreSQL migration + idempotency verification in CI;
+- tag/branch/version checks before release publication;
+- production-dependency SBOM generation for tagged releases.
 
 ### Runtime readiness
 
