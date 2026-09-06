@@ -1,5 +1,6 @@
 import { cacheGetOrFetch } from "@/lib/cache";
 import { REVALIDATE } from "@/lib/constants";
+import { assertLiveMarketDataAllowed } from "@/lib/demo-mode";
 import type {
   CompanyProfileData,
   DailyBarData,
@@ -20,6 +21,7 @@ import {
 const BASE_URL = "https://finnhub.io/api/v1";
 
 function getApiKey(): string {
+  assertLiveMarketDataAllowed();
   const key = process.env.FINNHUB_API_KEY;
   if (!key) throw new Error("FINNHUB_API_KEY is not set");
   return key;
@@ -67,7 +69,7 @@ export const finnhub: MarketDataProvider = {
         price: data.c,
         change: data.d,
         changePct: data.dp,
-        volume: 0, // Finnhub /quote does not include volume.
+        volume: 0,
         high: data.h,
         low: data.l,
         open: data.o,
@@ -157,7 +159,6 @@ export const finnhub: MarketDataProvider = {
   },
 };
 
-/** Fetch company-specific news from Finnhub (not part of the generic provider interface). */
 export async function getCompanyNews(
   symbol: string,
 ): Promise<MarketNewsItem[]> {
