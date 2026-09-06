@@ -62,3 +62,10 @@ jobs:
 
       - name: Build production application
         run: npm run build
+
+      - name: Verify credential-free demo seed is idempotent
+        env:
+          STOCKPULSE_DEMO_MODE: "true"
+        run: |
+          npm run demo:seed
+          npm run demo:seed
