@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { isDemoMode } from "@/lib/demo-mode";
 import {
   DEFAULT_DAILY_START_TOLERANCE_DAYS,
   hasDailyCoverage,
@@ -88,7 +89,7 @@ async function ensureSymbol(ticker: string, name = ticker) {
 }
 
 async function persistQuoteBestEffort(quote: Quote): Promise<void> {
-  if (!databaseConfigured()) return;
+  if (!databaseConfigured() || isDemoMode()) return;
   try {
     const symbol = await ensureSymbol(quote.symbol);
     await db.quoteSnapshot.upsert({
@@ -127,7 +128,7 @@ async function persistQuoteBestEffort(quote: Quote): Promise<void> {
 }
 
 async function persistBarsBestEffort(ticker: string, bars: DailyBarData[]): Promise<void> {
-  if (!databaseConfigured() || bars.length === 0) return;
+  if (!databaseConfigured() || isDemoMode() || bars.length === 0) return;
   try {
     const symbol = await ensureSymbol(ticker);
     await db.dailyBar.createMany({
@@ -148,7 +149,7 @@ async function persistBarsBestEffort(ticker: string, bars: DailyBarData[]): Prom
 }
 
 async function persistProfileBestEffort(profile: CompanyProfileData): Promise<void> {
-  if (!databaseConfigured()) return;
+  if (!databaseConfigured() || isDemoMode()) return;
   try {
     const symbol = await ensureSymbol(profile.ticker, profile.name || profile.ticker);
     await db.companyProfile.upsert({
@@ -183,8 +184,9 @@ async function persistProfileBestEffort(profile: CompanyProfileData): Promise<vo
 class CanonicalMarketRepository {
   async getQuote(rawSymbol: string): Promise<Quote> {
     const symbol = normalizeStockSymbol(rawSymbol);
-    let staleStored: Quote | null = null;
+    if (isDemoMode()) return marketData.getQuote(symbol);
 
+    let staleStored: Quote | null = null;
     if (databaseConfigured()) {
       try {
         const row = await db.quoteSnapshot.findFirst({
@@ -222,8 +224,9 @@ class CanonicalMarketRepository {
 
   async getDailyBars(rawSymbol: string, from: string, to: string): Promise<DailyBarData[]> {
     const symbol = normalizeStockSymbol(rawSymbol);
-    let stored: DailyBarData[] = [];
+    if (isDemoMode()) return marketData.getDailyBars(symbol, from, to);
 
+    let stored: DailyBarData[] = [];
     if (databaseConfigured()) {
       try {
         const rows = await db.dailyBar.findMany({
@@ -252,8 +255,9 @@ class CanonicalMarketRepository {
 
   async getCompanyProfile(rawSymbol: string): Promise<CompanyProfileData> {
     const symbol = normalizeStockSymbol(rawSymbol);
-    let staleStored: CompanyProfileData | null = null;
+    if (isDemoMode()) return marketData.getCompanyProfile(symbol);
 
+    let staleStored: CompanyProfileData | null = null;
     if (databaseConfigured()) {
       try {
         const stored = await db.symbol.findUnique({

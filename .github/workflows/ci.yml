@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, release/phase-1-release-foundation]
 
 permissions:
   contents: read
@@ -62,3 +62,10 @@ jobs:
 
       - name: Build production application
         run: npm run build
+
+      - name: Verify credential-free demo seed is idempotent
+        env:
+          STOCKPULSE_DEMO_MODE: "true"
+        run: |
+          npm run demo:seed
+          npm run demo:seed

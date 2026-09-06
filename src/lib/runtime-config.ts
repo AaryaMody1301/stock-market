@@ -1,7 +1,10 @@
+import { isDemoMode } from "@/lib/demo-mode";
+
 export interface RuntimeConfigurationStatus {
   databaseConfigured: boolean;
   marketDataConfigured: boolean;
   marketProviders: string[];
+  demoMode: boolean;
   secIngestionConfigured: boolean;
   aiConfigured: boolean;
   appUrlConfigured: boolean;
@@ -26,19 +29,25 @@ function hasRealSecContact(userAgent: string): boolean {
 export function getRuntimeConfigurationStatus(
   env: EnvLike = process.env,
 ): RuntimeConfigurationStatus {
+  const demoMode = isDemoMode(env);
   const marketProviders: string[] = [];
-  if (hasValue(env.FINNHUB_API_KEY)) marketProviders.push("finnhub");
-  if (hasValue(env.TWELVEDATA_API_KEY)) marketProviders.push("twelvedata");
+
+  if (demoMode) {
+    marketProviders.push("demo");
+  } else {
+    if (hasValue(env.FINNHUB_API_KEY)) marketProviders.push("finnhub");
+    if (hasValue(env.TWELVEDATA_API_KEY)) marketProviders.push("twelvedata");
+  }
 
   const secUserAgent = env.SEC_USER_AGENT?.trim() ?? "";
   const secIngestionConfigured = hasRealSecContact(secUserAgent);
-
   const aiKeyConfigured = hasValue(env.AI_GATEWAY_API_KEY) || hasValue(env.AI_API_KEY);
 
   return {
     databaseConfigured: hasValue(env.DATABASE_URL),
     marketDataConfigured: marketProviders.length > 0,
     marketProviders,
+    demoMode,
     secIngestionConfigured,
     aiConfigured: aiKeyConfigured && hasValue(env.AI_MODEL),
     appUrlConfigured: hasValue(env.NEXT_PUBLIC_APP_URL),

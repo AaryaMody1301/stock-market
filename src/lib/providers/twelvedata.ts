@@ -1,5 +1,6 @@
 import { cacheGetOrFetch } from "@/lib/cache";
 import { REVALIDATE } from "@/lib/constants";
+import { assertLiveMarketDataAllowed } from "@/lib/demo-mode";
 import type {
   CompanyProfileData,
   DailyBarData,
@@ -19,6 +20,7 @@ import {
 const BASE_URL = "https://api.twelvedata.com";
 
 function getApiKey(): string {
+  assertLiveMarketDataAllowed();
   const key = process.env.TWELVEDATA_API_KEY;
   if (!key) throw new Error("TWELVEDATA_API_KEY is not set");
   return key;
@@ -85,9 +87,6 @@ export const twelvedata: MarketDataProvider = {
 
   async getDailyBars(symbol: string, from: string, to: string): Promise<DailyBarData[]> {
     return cacheGetOrFetch(`td:bars:${symbol}:${from}:${to}`, REVALIDATE.profile, async () => {
-      // Twelve Data documents that outputsize restricts an explicitly bounded
-      // start_date/end_date request. Omitting it preserves the full requested
-      // range (subject to the provider's 5,000-point maximum).
       const payload = await fetchTwelveData("/time_series", {
         symbol,
         interval: "1day",
